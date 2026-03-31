@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import api from '../services/api';
 import { ShoppingCart, Printer, Check, Trash2 } from 'lucide-react';
 import SearchableSelect from '../components/SearchableSelect';
@@ -87,7 +87,15 @@ const POS = () => {
     setCart(newCart);
   };
 
-  const cartTotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+  const cartTotals = useMemo(() => {
+    let totalItems = 0;
+    let totalPrice = 0;
+    cart.forEach(item => {
+      totalItems += Number(item.quantity);
+      totalPrice += Number(item.price) * Number(item.quantity);
+    });
+    return { totalItems, totalPrice };
+  }, [cart]);
 
   const handleCheckout = async () => {
     if (!clientId || cart.length === 0) return;
@@ -195,7 +203,7 @@ const POS = () => {
           <div className="card">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
               <h4 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><ShoppingCart size={20} /> Checkout</h4>
-              <span className="badge badge-success">{cart.length} itens</span>
+              <span className="badge badge-success">{cartTotals.totalItems} itens</span>
             </div>
             
             <div style={{ minHeight: '300px', backgroundColor: '#F9FAFB', borderRadius: 'var(--radius-md)', padding: '1rem', marginBottom: '1rem' }}>
@@ -210,7 +218,7 @@ const POS = () => {
                       <td style={{ padding: '0.5rem 0' }}>{item.product.name}</td>
                       <td style={{ padding: '0.5rem 0', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
                         <div style={{ color: item.isSmartPrice ? 'var(--danger)' : 'var(--text-muted)', fontWeight: item.isSmartPrice ? 'bold' : 'normal' }}>
-                          R$ {Number(item.price).toFixed(2)} un
+                          {Number(item.price).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })} un
                         </div>
                         {item.isSmartPrice && (
                           <div style={{ fontSize: '0.7rem', marginTop: '0.2rem' }}>
@@ -226,7 +234,7 @@ const POS = () => {
                           </div>
                         )}
                       </td>
-                      <td style={{ padding: '0.5rem 0', fontWeight: 600 }}>R$ {(item.price * item.quantity).toFixed(2)}</td>
+                      <td style={{ padding: '0.5rem 0', fontWeight: 600 }}>{(Number(item.price) * Number(item.quantity)).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</td>
                       <td style={{ padding: '0.5rem 0', textAlign: 'right' }}>
                          <button type="button" className="btn btn-outline" style={{ padding: '0.2rem 0.5rem', color: 'var(--danger)' }} onClick={() => removeFromCart(index)}><Trash2 size={14} /></button>
                       </td>
@@ -239,7 +247,7 @@ const POS = () => {
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', fontSize: '1.25rem', fontWeight: 700 }}>
               <span>Total:</span>
-              <span style={{ color: 'var(--primary)' }}>R$ {cartTotal.toFixed(2)}</span>
+              <span style={{ color: 'var(--primary)' }}>{cartTotals.totalPrice.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</span>
             </div>
 
             <button className="btn btn-primary" style={{ width: '100%', padding: '1rem' }} onClick={handleCheckout} disabled={cart.length === 0}>
@@ -301,15 +309,15 @@ const POS = () => {
                   <tr key={idx}>
                     <td style={{ padding: '0.1rem 0' }}>{item.quantity}</td>
                     <td style={{ padding: '0.1rem 0' }}>{item.product.name}</td>
-                    <td style={{ padding: '0.1rem 0', textAlign: 'right' }}>{Number(item.price).toFixed(2)}</td>
-                    <td style={{ padding: '0.1rem 0', textAlign: 'right' }}>{(item.price * item.quantity).toFixed(2)}</td>
+                    <td style={{ padding: '0.1rem 0', textAlign: 'right' }}>{Number(item.price).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</td>
+                    <td style={{ padding: '0.1rem 0', textAlign: 'right' }}>{(Number(item.price) * Number(item.quantity)).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
 
             <div style={{ textAlign: 'right', fontSize: '14px', fontWeight: 'bold' }}>
-                TOTAL R$ {lastSale.total.toFixed(2)}
+                TOTAL {Number(lastSale.total).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}
             </div>
 
             <div style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.875rem' }}>
