@@ -52,6 +52,38 @@ module.exports = {
       };
     });
 
+    const pickupSalesQuery = await Sale.findAll({
+      where: { ...where, delivery_type: 'PICKUP' },
+      include: [
+        { association: 'client', attributes: ['name', 'address'] },
+        { 
+           association: 'items', 
+           attributes: ['quantity', 'price_sold'],
+           include: [{ association: 'product', attributes: ['name'] }]
+        }
+      ]
+    });
+
+    const pickupTotalAmount = pickupSalesQuery.reduce((acc, sale) => acc + Number(sale.total_price), 0);
+    report.push({
+      id: 'pickup',
+      name: 'Retirada no Local',
+      total_deliveries: pickupSalesQuery.length,
+      total_amount: pickupTotalAmount,
+      sales: pickupSalesQuery.map(s => ({
+        id: s.id,
+        total: s.total_price,
+        date: s.date,
+        client_name: s.client.name,
+        client_address: s.client.address,
+        items: s.items.map(i => ({
+           quantity: i.quantity,
+           price: i.price_sold,
+           product: { name: i.product.name }
+        }))
+      }))
+    });
+
     return res.json(report);
   }
 };
