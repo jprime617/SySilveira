@@ -30,7 +30,7 @@ module.exports = {
   },
 
   async store(req, res) {
-    const { client_id, delivery_person_id, items, delivery_type } = req.body; // items: [{product_id, quantity}]
+    const { client_id, delivery_person_id, items, delivery_type, frontend_total } = req.body; // items: [{product_id, quantity}]
 
     const transaction = await connection.transaction();
 
@@ -62,6 +62,11 @@ module.exports = {
           quantity: item.quantity,
           price_sold,
         });
+      }
+
+      // Validação Estrita de Preços Front vs Backend
+      if (frontend_total !== undefined && Number(total_price).toFixed(2) !== Number(frontend_total).toFixed(2)) {
+         throw new Error(`Divergência de valores detectada. Frontend enviou R$ ${Number(frontend_total).toFixed(2)} mas o Backend validou R$ ${Number(total_price).toFixed(2)}.`);
       }
 
       const sale = await Sale.create({

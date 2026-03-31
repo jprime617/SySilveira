@@ -12,6 +12,7 @@ const POS = () => {
   const [clientId, setClientId] = useState('');
   const [deliveryPersonId, setDeliveryPersonId] = useState('');
   const [deliveryType, setDeliveryType] = useState('DELIVERY');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [cart, setCart] = useState([]); // [{product, quantity, price}]
   
   const [selectedProductId, setSelectedProductId] = useState('');
@@ -98,15 +99,21 @@ const POS = () => {
   }, [cart]);
 
   const handleCheckout = async () => {
-    if (!clientId || cart.length === 0) return;
+    if (!clientId || cart.length === 0 || isSubmitting) return;
+    
+    setIsSubmitting(true);
+    setLastSale(null); // Clear previous receipt to prevent phantom data on slow network
+
     try {
       const payload = {
         client_id: clientId,
         delivery_person_id: deliveryType === 'PICKUP' ? null : (deliveryPersonId || null),
         delivery_type: deliveryType,
+        frontend_total: cartTotals.totalPrice, // Dual-validation
         items: cart.map(item => ({ product_id: item.product.id, quantity: item.quantity }))
       };
-      const res = await api.post('/sales', payload);
+      
+      const res = await api.post('/sales', payload, { headers: { 'Cache-Control': 'no-cache' } });
       
       setLastSale({
         id: res.data.id,
@@ -131,6 +138,8 @@ const POS = () => {
     } catch (error) {
       console.error('Erro de rede ou na API ao finalizar venda via Axios/Tailscale:', error);
       alert(error.response?.data?.error || 'Erro ao finalizar venda. Verifique a conexão com o servidor ou logs no console.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -250,8 +259,12 @@ const POS = () => {
               <span style={{ color: 'var(--primary)' }}>{cartTotals.totalPrice.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</span>
             </div>
 
-            <button className="btn btn-primary" style={{ width: '100%', padding: '1rem' }} onClick={handleCheckout} disabled={cart.length === 0}>
-              <Check size={20} /> Finalizar Venda
+            <button className="btn btn-primary" style={{ width: '100%', padding: '1rem', cursor: isSubmitting ? 'not-allowed' : 'pointer' }} onClick={handleCheckout} disabled={cart.length === 0 || isSubmitting}>
+              {isSubmitting ? (
+                 <>Processando Venda...</>
+              ) : (
+                 <><Check size={20} /> Finalizar Venda</>
+              )}
             </button>
           </div>
 
