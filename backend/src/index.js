@@ -7,7 +7,7 @@ const connection = require('./database');
 
 const app = express();
 
-app.use(cors());
+app.use(cors({ origin: process.env.FRONTEND_URL || '*' }));
 app.use(express.json());
 app.use(routes);
 
@@ -17,7 +17,7 @@ async function bootstrap() {
   try {
     await connection.authenticate();
     console.log('Database connected (WAL enabled natively).');
-    app.listen(PORT, () => {
+    app.listen(PORT, '0.0.0.0', () => {
       console.log(`Server started on port ${PORT}`);
     });
   } catch (error) {
