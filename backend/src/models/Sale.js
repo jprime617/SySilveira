@@ -11,6 +11,11 @@ class Sale extends Model {
         type: DataTypes.DATE,
         allowNull: false,
         defaultValue: DataTypes.NOW,
+      },
+      delivery_type: {
+        type: DataTypes.ENUM('DELIVERY', 'PICKUP'),
+        allowNull: false,
+        defaultValue: 'DELIVERY'
       }
     }, {
       sequelize,

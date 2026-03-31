@@ -11,6 +11,7 @@ const POS = () => {
 
   const [clientId, setClientId] = useState('');
   const [deliveryPersonId, setDeliveryPersonId] = useState('');
+  const [deliveryType, setDeliveryType] = useState('DELIVERY');
   const [cart, setCart] = useState([]); // [{product, quantity, price}]
   
   const [selectedProductId, setSelectedProductId] = useState('');
@@ -93,7 +94,8 @@ const POS = () => {
     try {
       const payload = {
         client_id: clientId,
-        delivery_person_id: deliveryPersonId || null,
+        delivery_person_id: deliveryType === 'PICKUP' ? null : (deliveryPersonId || null),
+        delivery_type: deliveryType,
         items: cart.map(item => ({ product_id: item.product.id, quantity: item.quantity }))
       };
       const res = await api.post('/sales', payload);
@@ -101,8 +103,9 @@ const POS = () => {
       setLastSale({
         id: res.data.id,
         client: clients.find(c => c.id === Number(clientId)),
-        delivery_person: deliveryPeople.find(d => d.id === Number(deliveryPersonId)),
-        total: cartTotal,
+        delivery_person: deliveryType === 'PICKUP' ? null : deliveryPeople.find(d => d.id === Number(deliveryPersonId)),
+        delivery_type: deliveryType,
+        total: Number(res.data.total_price),
         items: [...cart],
         date: new Date()
       });
@@ -111,13 +114,15 @@ const POS = () => {
       setCart([]);
       setClientId('');
       setDeliveryPersonId('');
+      setDeliveryType('DELIVERY');
       
       // Refresh products to update stock
       const pRes = await api.get('/products');
       setProducts(pRes.data);
 
     } catch (error) {
-      alert(error.response?.data?.error || 'Erro ao finalizar venda.');
+      console.error('Erro de rede ou na API ao finalizar venda via Axios/Tailscale:', error);
+      alert(error.response?.data?.error || 'Erro ao finalizar venda. Verifique a conexão com o servidor ou logs no console.');
     }
   };
 
@@ -143,11 +148,25 @@ const POS = () => {
               />
               <p style={{ fontSize: '0.75rem', color: 'var(--warning)', marginTop: '0.5rem', marginBottom: '1rem' }}>* O cliente afeta o preço do produto.</p>
 
-              <h4 style={{ marginBottom: '1rem', color: 'var(--primary)' }}>Entregador (Opcional)</h4>
-              <select className="form-select" value={deliveryPersonId} onChange={e => setDeliveryPersonId(e.target.value)} style={{ width: '100%' }}>
-                <option value="">Retirada no Local</option>
-                {deliveryPeople.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
-              </select>
+              <h4 style={{ marginBottom: '1rem', color: 'var(--primary)', marginTop: '1rem' }}>Logística de Entrega</h4>
+              <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                  <input type="radio" name="deliveryType" checked={deliveryType === 'DELIVERY'} onChange={() => setDeliveryType('DELIVERY')} /> Entrega (Motoboy)
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                  <input type="radio" name="deliveryType" checked={deliveryType === 'PICKUP'} onChange={() => { setDeliveryType('PICKUP'); setDeliveryPersonId(''); }} /> Retirada no Local
+                </label>
+              </div>
+
+              {deliveryType === 'DELIVERY' && (
+                <>
+                  <h4 style={{ marginBottom: '1rem', color: 'var(--primary)', marginTop: '0.5rem' }}>Entregador (Opcional)</h4>
+                  <select className="form-select" value={deliveryPersonId} onChange={e => setDeliveryPersonId(e.target.value)} style={{ width: '100%' }}>
+                    <option value="">Selecione o Entregador</option>
+                    {deliveryPeople.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                  </select>
+                </>
+              )}
             </div>
 
             <div className="card" style={{ opacity: clientId ? 1 : 0.5, pointerEvents: clientId ? 'auto' : 'none' }}>
@@ -261,7 +280,11 @@ const POS = () => {
             <div style={{ marginBottom: '0.5rem', fontSize: '11px' }}>
               <p style={{ margin: '0.1rem 0' }}><strong>CLIENTE:</strong> {lastSale.client?.name.toUpperCase()}</p>
               <p style={{ margin: '0.1rem 0' }}><strong>ENDEREÇO:</strong> {lastSale.client?.address || 'N/I'}</p>
-              <p style={{ margin: '0.1rem 0' }}><strong>ENTREGADOR:</strong> {lastSale.delivery_person?.name?.toUpperCase() || 'Retirada Local'}</p>
+              {lastSale.delivery_type === 'PICKUP' ? (
+                <p style={{ margin: '0.1rem 0', fontWeight: 'bold' }}>FORMA DE ENTREGA: RETIRADA NO LOCAL</p>
+              ) : (
+                <p style={{ margin: '0.1rem 0' }}><strong>ENTREGADOR:</strong> {lastSale.delivery_person?.name?.toUpperCase() || 'Não Informado'}</p>
+              )}
             </div>
 
             <table style={{ width: '100%', marginBottom: '0.5rem', borderTop: '1px solid black', borderBottom: '1px solid black', fontSize: '10px' }}>

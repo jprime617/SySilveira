@@ -30,7 +30,7 @@ module.exports = {
   },
 
   async store(req, res) {
-    const { client_id, delivery_person_id, items } = req.body; // items: [{product_id, quantity}]
+    const { client_id, delivery_person_id, items, delivery_type } = req.body; // items: [{product_id, quantity}]
 
     const transaction = await connection.transaction();
 
@@ -66,7 +66,8 @@ module.exports = {
 
       const sale = await Sale.create({
         client_id,
-        delivery_person_id,
+        delivery_person_id: delivery_type === 'PICKUP' ? null : delivery_person_id,
+        delivery_type: delivery_type || 'DELIVERY',
         total_price,
         date: new Date(),
       }, { transaction });
