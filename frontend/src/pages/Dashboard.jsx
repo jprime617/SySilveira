@@ -76,7 +76,7 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody>
-              {sales.slice(0, 5).map(sale => (
+              {sales.map(sale => (
                 <tr key={sale.id}>
                   <td>{new Date(sale.date).toLocaleDateString()}</td>
                   <td>{sale.client?.name}</td>

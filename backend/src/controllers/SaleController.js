@@ -22,7 +22,7 @@ module.exports = {
       include: [
         { association: 'client', attributes: ['name'] },
         { association: 'delivery_person', attributes: ['name'] },
-        { association: 'items', include: [{ association: 'product', attributes: ['name', 'sku'] }] }
+        { association: 'items', include: [{ association: 'product', attributes: ['id', 'name', 'sku'] }] }
       ],
       order: [['date', 'DESC']]
     });
@@ -182,7 +182,7 @@ module.exports = {
         include: [
           { association: 'client', attributes: ['name'] },
           { association: 'delivery_person', attributes: ['name'] },
-          { association: 'items', include: [{ association: 'product', attributes: ['name', 'sku'] }] }
+          { association: 'items', include: [{ association: 'product', attributes: ['id', 'name', 'sku'] }] }
         ]
       });
 

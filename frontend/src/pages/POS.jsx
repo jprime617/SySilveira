@@ -326,28 +326,28 @@ const POS = () => {
               )}
             </div>
 
-            <table style={{ width: '100%', marginBottom: '0.5rem', borderTop: '1px solid black', borderBottom: '1px solid black', fontSize: '10px' }}>
+            <table style={{ width: '100%', marginBottom: '0.5rem', borderTop: '1px solid black', borderBottom: '1px solid black', fontSize: '13px' }}>
               <thead>
                 <tr>
-                  <th style={{ padding: '0.2rem 0', textAlign: 'left' }}>QTD</th>
-                  <th style={{ padding: '0.2rem 0', textAlign: 'left' }}>ITEM</th>
-                  <th style={{ padding: '0.2rem 0', textAlign: 'right' }}>V.UN</th>
-                  <th style={{ padding: '0.2rem 0', textAlign: 'right' }}>TOTAL</th>
+                  <th style={{ padding: '0.4rem 0', textAlign: 'left' }}>QTD</th>
+                  <th style={{ padding: '0.4rem 0', textAlign: 'left' }}>ITEM</th>
+                  <th style={{ padding: '0.4rem 0', textAlign: 'right' }}>V.UN</th>
+                  <th style={{ padding: '0.4rem 0', textAlign: 'right' }}>TOTAL</th>
                 </tr>
               </thead>
               <tbody>
                 {lastSale.items.map((item, idx) => (
                   <tr key={idx}>
-                    <td style={{ padding: '0.1rem 0' }}>{item?.quantity || 1}</td>
-                    <td style={{ padding: '0.1rem 0' }}>{item?.product?.name || 'Produto'}</td>
-                    <td style={{ padding: '0.1rem 0', textAlign: 'right' }}>{Number(item?.price || 0).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</td>
-                    <td style={{ padding: '0.1rem 0', textAlign: 'right' }}>{(Number(item?.price || 0) * Number(item?.quantity || 1)).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</td>
+                    <td style={{ padding: '0.2rem 0', fontWeight: 'bold' }}>{item?.quantity || 1}</td>
+                    <td style={{ padding: '0.2rem 0', fontWeight: 'bold' }}>{item?.product?.name || 'Produto'}</td>
+                    <td style={{ padding: '0.2rem 0', textAlign: 'right' }}>{Number(item?.price || 0).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</td>
+                    <td style={{ padding: '0.2rem 0', textAlign: 'right' }}>{(Number(item?.price || 0) * Number(item?.quantity || 1)).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
 
-            <div style={{ textAlign: 'right', fontSize: '14px', fontWeight: 'bold' }}>
+            <div style={{ textAlign: 'right', fontSize: '16px', fontWeight: 'bold' }}>
                 TOTAL {Number(lastSale.total).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}
             </div>
 
