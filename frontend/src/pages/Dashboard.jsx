@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../services/api';
-import { Package, Users, ShoppingCart, TrendingUp } from 'lucide-react';
+import { Package, Users, ShoppingCart, TrendingUp, Edit } from 'lucide-react';
 
 const Dashboard = () => {
   const [sales, setSales] = useState([]);
@@ -71,6 +72,7 @@ const Dashboard = () => {
                 <th>Entregador</th>
                 <th>Itens</th>
                 <th>Valor Total</th>
+                <th>Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -81,6 +83,11 @@ const Dashboard = () => {
                   <td>{sale.delivery_person?.name || 'Retirada'}</td>
                   <td>{sale.items.length}</td>
                   <td style={{ fontWeight: 600, color: 'var(--success)' }}>R$ {Number(sale.total_price).toFixed(2)}</td>
+                  <td>
+                    <Link to={`/edit-sale/${sale.id}`} className="btn btn-outline" style={{ padding: '0.2rem 0.5rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.75rem', textDecoration: 'none' }}>
+                      <Edit size={14} /> Revisar
+                    </Link>
+                  </td>
                 </tr>
               ))}
               {sales.length === 0 && (

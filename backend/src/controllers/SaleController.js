@@ -92,5 +92,104 @@ module.exports = {
       await transaction.rollback();
       return res.status(400).json({ error: error.message });
     }
+  },
+
+  async update(req, res) {
+    const { id } = req.params;
+    const { client_id, delivery_person_id, items, delivery_type, frontend_total } = req.body;
+
+    const transaction = await connection.transaction();
+
+    try {
+      const sale = await Sale.findByPk(id, {
+        include: [{ association: 'items' }],
+        transaction
+      });
+
+      if (!sale) {
+        throw new Error('Venda não encontrada');
+      }
+
+      // Step 1: Restore stock from old items
+      if (sale.items && sale.items.length > 0) {
+        for (let oldItem of sale.items) {
+          const product = await Product.findByPk(oldItem.product_id, { transaction });
+          if (product) {
+            await product.update(
+              { stock_quantity: product.stock_quantity + oldItem.quantity },
+              { transaction }
+            );
+          }
+        }
+        // Destroy old items
+        await SaleItem.destroy({ where: { sale_id: sale.id }, transaction });
+      }
+
+      // Step 2: Calculate new total and deduct new stock (Exactly like store)
+      let total_price = 0;
+      const saleItemsData = [];
+
+      for (let item of items) {
+        const product = await Product.findByPk(item.product_id, { transaction });
+        if (!product) throw new Error(`Product ${item.product_id} not found`);
+        if (product.stock_quantity < item.quantity) {
+          throw new Error(`Estoque insuficiente para o Produto: ${product.name}`);
+        }
+
+        // Resolve price
+        let price_sold;
+        if (item.override_price !== undefined && item.override_price !== null) {
+          price_sold = item.override_price;
+        } else {
+          const clientPrice = await ClientPrice.findOne({
+            where: { client_id, product_id: item.product_id },
+            transaction
+          });
+          price_sold = clientPrice ? clientPrice.agreed_price : product.base_price;
+        }
+
+        total_price += Number(price_sold) * item.quantity;
+
+        // Subtract stock for new calculation
+        await product.update(
+          { stock_quantity: product.stock_quantity - item.quantity },
+          { transaction }
+        );
+
+        saleItemsData.push({
+          product_id: item.product_id,
+          quantity: item.quantity,
+          price_sold,
+          sale_id: sale.id // link directly to existing sale
+        });
+      }
+
+      // Update the Sale header
+      await sale.update({
+        client_id,
+        delivery_person_id: delivery_type === 'PICKUP' ? null : delivery_person_id,
+        delivery_type: delivery_type || 'DELIVERY',
+        total_price
+      }, { transaction });
+
+      // Create new items
+      await SaleItem.bulkCreate(saleItemsData, { transaction });
+
+      await transaction.commit();
+
+      // Return updated sale
+      const updatedSale = await Sale.findByPk(sale.id, {
+        include: [
+          { association: 'client', attributes: ['name'] },
+          { association: 'delivery_person', attributes: ['name'] },
+          { association: 'items', include: [{ association: 'product', attributes: ['name', 'sku'] }] }
+        ]
+      });
+
+      return res.json(updatedSale);
+    } catch (error) {
+      await transaction.rollback();
+      return res.status(400).json({ error: error.message });
+    }
   }
 };

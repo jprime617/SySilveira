@@ -9,6 +9,7 @@ import Products from './pages/Products';
 import Clients from './pages/Clients';
 import Logistics from './pages/Logistics'; // Delivery Reports
 import POS from './pages/POS'; // Point of Sale
+import EditSale from './pages/EditSale';
 
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem('@ERPLite:token');
@@ -26,6 +27,7 @@ function App() {
         <Route path="/clients" element={<PrivateRoute><Clients /></PrivateRoute>} />
         <Route path="/logistics" element={<PrivateRoute><Logistics /></PrivateRoute>} />
         <Route path="/pos" element={<PrivateRoute><POS /></PrivateRoute>} />
+        <Route path="/edit-sale/:id" element={<PrivateRoute><EditSale /></PrivateRoute>} />
       </Routes>
     </BrowserRouter>
   );

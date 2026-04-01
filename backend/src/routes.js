@@ -34,6 +34,7 @@ routes.get('/clients/:client_id/prices', ClientPriceController.index);
 // Sales
 routes.get('/sales', SaleController.index);
 routes.post('/sales', SaleController.store);
+routes.put('/sales/:id', SaleController.update);
 routes.get('/products', ProductController.index); // Move products index here so users can fetch products to sell
 
 // Delivery / Logistics
