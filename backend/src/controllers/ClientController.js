@@ -76,5 +76,23 @@ module.exports = {
 
     await client.update({ name, address, phone });
     return res.json(client);
+  },
+
+  async destroy(req, res) {
+    const { id } = req.params;
+    try {
+      const client = await Client.findByPk(id);
+      if (!client) {
+        return res.status(404).json({ error: 'Cliente não encontrado.' });
+      }
+      
+      await client.destroy();
+      return res.status(204).send();
+    } catch (error) {
+      if (error.name === 'SequelizeForeignKeyConstraintError') {
+        return res.status(400).json({ error: 'Este cliente possui compras antigas. Por segurança financeira, ele não pode ser apagado permanentemente.' });
+      }
+      return res.status(500).json({ error: error.message });
+    }
   }
 };

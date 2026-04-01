@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import api from '../services/api';
-import { Plus, DollarSign, Upload, Download } from 'lucide-react';
+import { Plus, DollarSign, Upload, Download, Trash2 } from 'lucide-react';
 import SearchableSelect from '../components/SearchableSelect';
 
 const Clients = () => {
@@ -89,6 +89,17 @@ const Clients = () => {
 
   const handleEditCancel = () => {
     setEditingClient(null);
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('Tem certeza absoluta que deseja apagar este cliente permanentemente?')) {
+      try {
+        await api.delete(`/clients/${id}`);
+        setClients(clients.filter(c => c.id !== id));
+      } catch (err) {
+        alert(err.response?.data?.error || 'Erro ao apagar o cliente.');
+      }
+    }
   };
 
   const handleFileUpload = async (e) => {
@@ -248,9 +259,14 @@ const Clients = () => {
                     <td>{client.address}</td>
                     {userRole === 'ADMIN' && (
                       <td style={{ textAlign: 'right' }}>
-                        <button className="btn btn-primary" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }} onClick={() => handleEditClick(client)}>
-                          Editar
-                        </button>
+                        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                          <button className="btn btn-primary" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }} onClick={() => handleEditClick(client)}>
+                            Editar
+                          </button>
+                          <button className="btn" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem', backgroundColor: 'var(--danger)', color: 'white' }} onClick={() => handleDelete(client.id)}>
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
                       </td>
                     )}
                   </tr>

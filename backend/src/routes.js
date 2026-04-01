@@ -28,6 +28,7 @@ routes.get('/clients', ClientController.index);
 routes.post('/clients/bulk', ClientController.bulkStore);
 routes.post('/clients', ClientController.store);
 routes.put('/clients/:id', ClientController.update);
+routes.delete('/clients/:id', ClientController.destroy);
 
 routes.get('/clients/:client_id/prices', ClientPriceController.index);
 
@@ -49,5 +50,6 @@ routes.post('/clients/:client_id/prices', ClientPriceController.store);
 routes.post('/products/bulk', ProductController.bulkStore);
 routes.post('/products', ProductController.store);
 routes.put('/products/:id', ProductController.update);
+routes.delete('/products/:id', ProductController.destroy);
 
 module.exports = routes;

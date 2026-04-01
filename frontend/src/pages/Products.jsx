@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import api from '../services/api';
-import { Plus, Upload, Download } from 'lucide-react';
+import { Plus, Upload, Download, Trash2 } from 'lucide-react';
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -79,6 +79,17 @@ const Products = () => {
 
   const handleEditCancel = () => {
     setEditingProduct(null);
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('Tem certeza absoluta que deseja apagar este produto permanentemente? Esta ação não pode ser desfeita.')) {
+      try {
+        await api.delete(`/products/${id}`);
+        setProducts(products.filter(p => p.id !== id));
+      } catch (err) {
+        alert(err.response?.data?.error || 'Erro ao apagar o produto do sistema.');
+      }
+    }
   };
 
   const handleFileUpload = async (e) => {
@@ -215,6 +226,9 @@ const Products = () => {
                           </button>
                           <button className="btn btn-outline" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }} onClick={() => handleAddStock(product)}>
                             + Estoque
+                          </button>
+                          <button className="btn" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem', backgroundColor: 'var(--danger)', color: 'white' }} onClick={() => handleDelete(product.id)}>
+                            <Trash2 size={14} />
                           </button>
                         </div>
                       </td>

@@ -123,5 +123,23 @@ module.exports = {
     }
 
     return res.json(product);
+  },
+
+  async destroy(req, res) {
+    const { id } = req.params;
+    try {
+      const product = await Product.findByPk(id);
+      if (!product) {
+        return res.status(404).json({ error: 'Produto não encontrado.' });
+      }
+      
+      await product.destroy();
+      return res.status(204).send();
+    } catch (error) {
+      if (error.name === 'SequelizeForeignKeyConstraintError') {
+        return res.status(400).json({ error: 'Este produto já possui histórico de vendas e não pode ser apagado para garantir a integridade contábil do sistema.' });
+      }
+      return res.status(500).json({ error: error.message });
+    }
   }
 };
