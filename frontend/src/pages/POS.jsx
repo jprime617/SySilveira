@@ -28,9 +28,9 @@ const POS = () => {
           api.get('/products'),
           api.get('/delivery_people')
         ]);
-        setClients(cRes.data);
-        setProducts(pRes.data);
-        setDeliveryPeople(dRes.data);
+        setClients(Array.isArray(cRes.data) ? cRes.data : []);
+        setProducts(Array.isArray(pRes.data) ? pRes.data : []);
+        setDeliveryPeople(Array.isArray(dRes.data) ? dRes.data : []);
       } catch (err) {
         console.error(err);
       } finally {
@@ -125,15 +125,14 @@ const POS = () => {
         date: new Date()
       });
 
-      alert('Venda finalizada com sucesso!');
       setCart([]);
       setClientId('');
       setDeliveryPersonId('');
       setDeliveryType('DELIVERY');
-      
+
       // Refresh products to update stock
       const pRes = await api.get('/products');
-      setProducts(pRes.data);
+      setProducts(Array.isArray(pRes.data) ? pRes.data : []);
 
     } catch (error) {
       console.error('Erro de rede ou na API ao finalizar venda via Axios/Tailscale:', error);
@@ -320,10 +319,10 @@ const POS = () => {
               <tbody>
                 {lastSale.items.map((item, idx) => (
                   <tr key={idx}>
-                    <td style={{ padding: '0.1rem 0' }}>{item.quantity}</td>
-                    <td style={{ padding: '0.1rem 0' }}>{item.product.name}</td>
-                    <td style={{ padding: '0.1rem 0', textAlign: 'right' }}>{Number(item.price).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</td>
-                    <td style={{ padding: '0.1rem 0', textAlign: 'right' }}>{(Number(item.price) * Number(item.quantity)).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</td>
+                    <td style={{ padding: '0.1rem 0' }}>{item?.quantity || 1}</td>
+                    <td style={{ padding: '0.1rem 0' }}>{item?.product?.name || 'Produto'}</td>
+                    <td style={{ padding: '0.1rem 0', textAlign: 'right' }}>{Number(item?.price || 0).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</td>
+                    <td style={{ padding: '0.1rem 0', textAlign: 'right' }}>{(Number(item?.price || 0) * Number(item?.quantity || 1)).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</td>
                   </tr>
                 ))}
               </tbody>
