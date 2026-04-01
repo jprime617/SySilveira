@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import api from '../services/api';
 import { Plus, DollarSign, Upload, Download } from 'lucide-react';
+import SearchableSelect from '../components/SearchableSelect';
 
 const Clients = () => {
   const [clients, setClients] = useState([]);
@@ -11,6 +12,9 @@ const Clients = () => {
   const [priceForm, setPriceForm] = useState({ client_id: '', product_id: '', agreed_price: '' });
   const [userRole, setUserRole] = useState('');
   const fileInputRef = useRef(null);
+
+  const [editingClient, setEditingClient] = useState(null);
+  const [editClientForm, setEditClientForm] = useState({ name: '', phone: '', address: '' });
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('@ERPLite:user') || '{}');
@@ -62,6 +66,29 @@ const Clients = () => {
     } catch (err) {
       alert('Erro ao salvar preço');
     }
+  };
+
+  const handleEditClick = (client) => {
+    setEditingClient(client.id);
+    setEditClientForm({
+      name: client.name,
+      phone: client.phone || '',
+      address: client.address || ''
+    });
+  };
+
+  const handleEditSave = async (id) => {
+    try {
+      await api.put(`/clients/${id}`, editClientForm);
+      setEditingClient(null);
+      loadClients();
+    } catch (err) {
+      alert('Erro ao salvar edições do cliente.');
+    }
+  };
+
+  const handleEditCancel = () => {
+    setEditingClient(null);
   };
 
   const handleFileUpload = async (e) => {
@@ -157,17 +184,23 @@ const Clients = () => {
           <form onSubmit={handlePriceSubmit}>
             <div className="form-group">
               <label>Cliente</label>
-              <select className="form-select" value={priceForm.client_id} onChange={e => setPriceForm({...priceForm, client_id: e.target.value})} required>
-                <option value="">Selecione o Cliente</option>
-                {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
+              <SearchableSelect 
+                options={clients.map(c => ({ id: c.id, label: c.name }))}
+                value={priceForm.client_id}
+                onChange={id => setPriceForm({...priceForm, client_id: id})}
+                placeholder="Busque o cliente pelo nome..."
+                required={true}
+              />
             </div>
             <div className="form-group">
               <label>Produto</label>
-              <select className="form-select" value={priceForm.product_id} onChange={e => setPriceForm({...priceForm, product_id: e.target.value})} required>
-                <option value="">Selecione o Produto</option>
-                {products.map(p => <option key={p.id} value={p.id}>{p.name} (Base: R$ {p.base_price})</option>)}
-              </select>
+              <SearchableSelect 
+                options={products.map(p => ({ id: p.id, label: `${p.name} (Base: R$ ${p.base_price})` }))}
+                value={priceForm.product_id}
+                onChange={id => setPriceForm({...priceForm, product_id: id})}
+                placeholder="Busque o produto..."
+                required={true}
+              />
             </div>
             <div className="form-group">
               <label>Preço Acordado (R$)</label>
@@ -189,19 +222,42 @@ const Clients = () => {
                 <th>Nome</th>
                 <th>Telefone</th>
                 <th>Endereço</th>
+                {userRole === 'ADMIN' && <th style={{ textAlign: 'right' }}>Ações</th>}
               </tr>
             </thead>
             <tbody>
               {clients.map(client => (
-                <tr key={client.id}>
-                  <td>{client.id}</td>
-                  <td style={{ fontWeight: 500 }}>{client.name}</td>
-                  <td>{client.phone}</td>
-                  <td>{client.address}</td>
-                </tr>
+                editingClient === client.id ? (
+                  <tr key={client.id}>
+                    <td>{client.id}</td>
+                    <td><input type="text" className="form-input" value={editClientForm.name} onChange={e => setEditClientForm({...editClientForm, name: e.target.value})} style={{ padding: '0.2rem', height: 'auto' }} /></td>
+                    <td><input type="text" className="form-input" value={editClientForm.phone} onChange={e => setEditClientForm({...editClientForm, phone: e.target.value})} style={{ padding: '0.2rem', height: 'auto', width: '120px' }} /></td>
+                    <td><input type="text" className="form-input" value={editClientForm.address} onChange={e => setEditClientForm({...editClientForm, address: e.target.value})} style={{ padding: '0.2rem', height: 'auto' }} /></td>
+                    <td style={{ textAlign: 'right' }}>
+                      <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                        <button className="btn btn-success" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }} onClick={() => handleEditSave(client.id)}>Salvar</button>
+                        <button className="btn" style={{ backgroundColor: 'var(--danger)', color: 'white', padding: '0.2rem 0.5rem', fontSize: '0.75rem' }} onClick={handleEditCancel}>Cancelar</button>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  <tr key={client.id}>
+                    <td>{client.id}</td>
+                    <td style={{ fontWeight: 500 }}>{client.name}</td>
+                    <td>{client.phone}</td>
+                    <td>{client.address}</td>
+                    {userRole === 'ADMIN' && (
+                      <td style={{ textAlign: 'right' }}>
+                        <button className="btn btn-primary" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }} onClick={() => handleEditClick(client)}>
+                          Editar
+                        </button>
+                      </td>
+                    )}
+                  </tr>
+                )
               ))}
               {!loading && clients.length === 0 && (
-                <tr><td colSpan="4" style={{ textAlign: 'center' }}>Nenhum cliente cadastrado.</td></tr>
+                <tr><td colSpan={userRole === 'ADMIN' ? 5 : 4} style={{ textAlign: 'center' }}>Nenhum cliente cadastrado.</td></tr>
               )}
             </tbody>
           </table>
