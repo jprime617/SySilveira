@@ -45,13 +45,18 @@ module.exports = {
           throw new Error(`Insufficient stock for Product ${product.name}`);
         }
 
-        // Resolve price (ClientPrice vs Base Price)
-        const clientPrice = await ClientPrice.findOne({
-          where: { client_id, product_id: item.product_id },
-          transaction
-        });
+        // Resolve price (Override vs ClientPrice vs Base Price)
+        let price_sold;
+        if (item.override_price !== undefined && item.override_price !== null) {
+          price_sold = item.override_price;
+        } else {
+          const clientPrice = await ClientPrice.findOne({
+            where: { client_id, product_id: item.product_id },
+            transaction
+          });
+          price_sold = clientPrice ? clientPrice.agreed_price : product.base_price;
+        }
 
-        const price_sold = clientPrice ? clientPrice.agreed_price : product.base_price;
         total_price += Number(price_sold) * item.quantity;
 
         // Subtract stock

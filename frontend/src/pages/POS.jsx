@@ -110,7 +110,7 @@ const POS = () => {
         delivery_person_id: deliveryType === 'PICKUP' ? null : (deliveryPersonId || null),
         delivery_type: deliveryType,
         frontend_total: cartTotals.totalPrice, // Dual-validation
-        items: cart.map(item => ({ product_id: item.product.id, quantity: item.quantity }))
+        items: cart.map(item => ({ product_id: item.product.id, quantity: item.quantity, override_price: Number(item.price) }))
       };
       
       const res = await api.post('/sales', payload, { headers: { 'Cache-Control': 'no-cache' } });
@@ -225,8 +225,27 @@ const POS = () => {
                       <td style={{ padding: '0.5rem 0' }}>{item.quantity}x</td>
                       <td style={{ padding: '0.5rem 0' }}>{item.product.name}</td>
                       <td style={{ padding: '0.5rem 0', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
-                        <div style={{ color: item.isSmartPrice ? 'var(--danger)' : 'var(--text-muted)', fontWeight: item.isSmartPrice ? 'bold' : 'normal' }}>
-                          {Number(item.price).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })} un
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                          <span style={{ color: item.isSmartPrice ? 'var(--danger)' : 'var(--text-muted)', fontWeight: item.isSmartPrice ? 'bold' : 'normal' }}>R$</span>
+                          <input 
+                            type="number"
+                            step="0.01"
+                            className="form-input"
+                            style={{ 
+                              padding: '0.1rem 0.3rem', 
+                              height: '24px', 
+                              width: '70px', 
+                              fontSize: '0.875rem',
+                              color: item.isSmartPrice ? 'var(--danger)' : 'inherit',
+                              fontWeight: item.isSmartPrice ? 'bold' : 'normal'
+                            }}
+                            value={item.price}
+                            onChange={(e) => {
+                              const newCart = [...cart];
+                              newCart[index].price = e.target.value;
+                              setCart(newCart);
+                            }}
+                          />
                         </div>
                         {item.isSmartPrice && (
                           <div style={{ fontSize: '0.7rem', marginTop: '0.2rem' }}>
