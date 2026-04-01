@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import api from '../services/api';
-import { Plus } from 'lucide-react';
+import { Plus, Upload, Download } from 'lucide-react';
 
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState('');
+  const fileInputRef = useRef(null);
 
   const [form, setForm] = useState({ sku: '', name: '', stock_quantity: 0, base_price: '' });
 
@@ -54,6 +55,53 @@ const Products = () => {
     }
   };
 
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const text = event.target.result;
+      const lines = text.split('\n');
+      
+      const parsedProducts = [];
+
+      // Começa do índice 1 p/ pular o cabeçalho (SKU,Nome,Estoque,Preco)
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+        
+        // Suporta tanto o CSV de vírgula quanto o CSV europeu/brasileiro de Excel usando ponto-e-vírgula
+        const separator = line.includes(';') ? ';' : ',';
+        const cols = line.split(separator);
+
+        if (cols.length >= 4) {
+          parsedProducts.push({
+            sku: cols[0].trim(),
+            name: cols[1].trim(),
+            stock_quantity: Number(cols[2].trim().replace(',', '.')), // protege contra casas decimais erradas no estoque
+            base_price: Number(cols[3].trim().replace(',', '.'))
+          });
+        }
+      }
+
+      if (parsedProducts.length === 0) {
+        alert('Nenhum produto válido encontrado no arquivo CSV.');
+        return;
+      }
+
+      try {
+        const res = await api.post('/products/bulk', { products: parsedProducts });
+        alert(`Sucesso! Criados: ${res.data.results.created}, Atualizados: ${res.data.results.updated}. (Erros: ${res.data.results.errors.length})`);
+        loadProducts();
+      } catch (error) {
+        alert(error.response?.data?.error || 'Erro Crítico ao importar lotes CSV.');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = ''; // Reset file input
+  };
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
@@ -62,7 +110,18 @@ const Products = () => {
 
       {userRole === 'ADMIN' && (
         <div className="card" style={{ marginBottom: '2rem' }}>
-          <h4 style={{ marginBottom: '1rem', color: 'var(--text-muted)' }}>Novo Produto</h4>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h4 style={{ color: 'var(--text-muted)' }}>Novo Produto</h4>
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <a href="/modelo_produtos.csv" download className="btn btn-outline" style={{ fontSize: '0.875rem' }}>
+                <Download size={16} /> Baixar Modelo CSV
+              </a>
+              <input type="file" accept=".csv" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileUpload} />
+              <button className="btn btn-success" style={{ fontSize: '0.875rem' }} onClick={() => fileInputRef.current?.click()}>
+                <Upload size={16} /> Importar CSV
+              </button>
+            </div>
+          </div>
           <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr 1fr auto', gap: '1rem', alignItems: 'end' }}>
             <div className="form-group" style={{ marginBottom: 0 }}>
               <label>SKU</label>

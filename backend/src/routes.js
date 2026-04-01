@@ -44,6 +44,7 @@ routes.get('/delivery/reports', DeliveryReportController.index);
 routes.use(adminMiddleware);
 routes.post('/clients/:client_id/prices', ClientPriceController.store);
 
+routes.post('/products/bulk', ProductController.bulkStore);
 routes.post('/products', ProductController.store);
 routes.put('/products/:id', ProductController.update);
 
