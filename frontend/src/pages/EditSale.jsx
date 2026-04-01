@@ -20,6 +20,7 @@ const EditSale = () => {
   
   const [selectedProductId, setSelectedProductId] = useState('');
   const [quantity, setQuantity] = useState(1);
+  const [isCold, setIsCold] = useState(false);
 
   const [lastSale, setLastSale] = useState(null);
 
@@ -98,17 +99,18 @@ const EditSale = () => {
       console.error(err);
     }
 
-    const existingItemIndex = cart.findIndex(item => item.product.id === product.id);
+    const existingItemIndex = cart.findIndex(item => item.product.id === product.id && item.isCold === isCold);
     if (existingItemIndex >= 0) {
       const newCart = [...cart];
       newCart[existingItemIndex].quantity += Number(quantity);
       setCart(newCart);
     } else {
-      setCart([...cart, { product, quantity: Number(quantity), price: priceToApply, originalPrice: Number(product.base_price), isSmartPrice }]);
+      setCart([...cart, { product, quantity: Number(quantity), price: priceToApply, originalPrice: Number(product.base_price), isSmartPrice, isCold }]);
     }
 
     setSelectedProductId('');
     setQuantity(1);
+    setIsCold(false);
   };
 
   const removeFromCart = (index) => {
@@ -230,6 +232,11 @@ const EditSale = () => {
                   <label>Qtd</label>
                   <input type="number" min="1" className="form-input" value={quantity} onChange={e => setQuantity(e.target.value)} required />
                 </div>
+                <div className="form-group" style={{ marginBottom: 0, display: 'flex', alignItems: 'flex-end', paddingBottom: '0.6rem' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', margin: 0, fontWeight: 500, color: 'var(--primary)' }}>
+                    <input type="checkbox" checked={isCold} onChange={e => setIsCold(e.target.checked)} /> ❄️ Gelado
+                  </label>
+                </div>
                 <button type="submit" className="btn btn-primary" style={{ height: '42px' }}>Incluir</button>
               </form>
             </div>
@@ -251,7 +258,7 @@ const EditSale = () => {
                   {cart.map((item, index) => (
                     <tr key={index} style={{ borderBottom: '1px solid var(--border)' }}>
                       <td style={{ padding: '0.5rem 0' }}>{item.quantity}x</td>
-                      <td style={{ padding: '0.5rem 0' }}>{item.product.name}</td>
+                      <td style={{ padding: '0.5rem 0' }}>{item.product.name} {item.isCold && <span style={{ color: '#0284c7', fontSize: '0.75rem', fontWeight: 'bold' }}>(GELADO)</span>}</td>
                       <td style={{ padding: '0.5rem 0', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
                           <span style={{ color: item.isSmartPrice ? 'var(--danger)' : 'var(--text-muted)', fontWeight: item.isSmartPrice ? 'bold' : 'normal' }}>R$</span>
@@ -367,7 +374,7 @@ const EditSale = () => {
                 {lastSale.items.map((item, idx) => (
                   <tr key={idx}>
                     <td style={{ padding: '0.2rem 0', fontWeight: 'bold' }}>{item?.quantity || 1}</td>
-                    <td style={{ padding: '0.2rem 0', fontWeight: 'bold' }}>{item?.product?.name || 'Produto'}</td>
+                    <td style={{ padding: '0.2rem 0', fontWeight: 'bold' }}>{item?.product?.name || 'Produto'} {item?.isCold ? '❄️(GELADO)' : ''}</td>
                     <td style={{ padding: '0.2rem 0', textAlign: 'right' }}>{Number(item?.price || 0).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</td>
                     <td style={{ padding: '0.2rem 0', textAlign: 'right' }}>{(Number(item?.price || 0) * Number(item?.quantity || 1)).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</td>
                   </tr>
