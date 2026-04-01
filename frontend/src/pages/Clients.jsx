@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import api from '../services/api';
-import { Plus, DollarSign } from 'lucide-react';
+import { Plus, DollarSign, Upload, Download } from 'lucide-react';
 
 const Clients = () => {
   const [clients, setClients] = useState([]);
@@ -10,6 +10,7 @@ const Clients = () => {
   const [products, setProducts] = useState([]);
   const [priceForm, setPriceForm] = useState({ client_id: '', product_id: '', agreed_price: '' });
   const [userRole, setUserRole] = useState('');
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('@ERPLite:user') || '{}');
@@ -63,9 +64,67 @@ const Clients = () => {
     }
   };
 
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const text = event.target.result;
+      const lines = text.split('\n');
+      
+      const parsedClients = [];
+
+      // Pula cabeçalho Nome,Telefone,Endereco
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+        
+        const separator = line.includes(';') ? ';' : ',';
+        const cols = line.split(separator);
+
+        if (cols.length >= 2) {
+          parsedClients.push({
+            name: cols[0].trim(),
+            phone: cols[1].trim(),
+            address: cols[2] ? cols[2].trim() : ''
+          });
+        }
+      }
+
+      if (parsedClients.length === 0) {
+        alert('Nenhum dado válido de cliente encontrado.');
+        return;
+      }
+
+      try {
+        const res = await api.post('/clients/bulk', { clients: parsedClients });
+        alert(`Sucesso! Criados: ${res.data.results.created}, Atualizados: ${res.data.results.updated}. Erros: ${res.data.results.errors.length}`);
+        loadClients();
+      } catch (error) {
+        alert(error.response?.data?.error || 'Erro Crítico na importação CSV.');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
   return (
     <div>
-      <h3>Gerenciar Clientes</h3>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+        <h3>Gerenciar Clientes</h3>
+        {userRole === 'ADMIN' && (
+          <div style={{ display: 'flex', gap: '1rem' }}>
+            <a href="/modelo_clientes.csv" download className="btn btn-outline" style={{ fontSize: '0.875rem' }}>
+              <Download size={16} /> Baixar Modelo CSV
+            </a>
+            <input type="file" accept=".csv" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileUpload} />
+            <button className="btn btn-success" style={{ fontSize: '0.875rem' }} onClick={() => fileInputRef.current?.click()}>
+              <Upload size={16} /> Importar CSV
+            </button>
+          </div>
+        )}
+      </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: userRole === 'ADMIN' ? '1fr 1fr' : '1fr', gap: '2rem', marginTop: '1.5rem', marginBottom: '2rem' }}>
         {/* Cliente Form */}

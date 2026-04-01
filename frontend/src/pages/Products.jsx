@@ -10,6 +10,9 @@ const Products = () => {
 
   const [form, setForm] = useState({ sku: '', name: '', stock_quantity: 0, base_price: '' });
 
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [editForm, setEditForm] = useState({ name: '', stock_quantity: 0, base_price: '' });
+
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('@ERPLite:user') || '{}');
     setUserRole(user.role);
@@ -53,6 +56,29 @@ const Products = () => {
     } catch (err) {
       alert('Erro ao atualizar estoque');
     }
+  };
+
+  const handleEditClick = (product) => {
+    setEditingProduct(product.id);
+    setEditForm({
+      name: product.name,
+      stock_quantity: product.stock_quantity,
+      base_price: product.base_price
+    });
+  };
+
+  const handleEditSave = async (id) => {
+    try {
+      await api.put(`/products/${id}`, editForm);
+      setEditingProduct(null);
+      loadProducts();
+    } catch (err) {
+      alert('Erro ao salvar edições do produto.');
+    }
+  };
+
+  const handleEditCancel = () => {
+    setEditingProduct(null);
   };
 
   const handleFileUpload = async (e) => {
@@ -158,23 +184,43 @@ const Products = () => {
             </thead>
             <tbody>
               {products.map(product => (
-                <tr key={product.id}>
-                  <td><span className="badge" style={{ backgroundColor: '#E0E7FF', color: 'var(--primary)' }}>{product.sku}</span></td>
-                  <td style={{ fontWeight: 500 }}>{product.name}</td>
-                  <td>
-                    <span className={`badge ${product.stock_quantity > 0 ? 'badge-success' : ''}`} style={product.stock_quantity <= 0 ? { backgroundColor: 'var(--danger-bg)', color: 'var(--danger)' } : {}}>
-                      {product.stock_quantity} un.
-                    </span>
-                  </td>
-                  <td>R$ {Number(product.base_price).toFixed(2)}</td>
-                  {userRole === 'ADMIN' && (
+                editingProduct === product.id ? (
+                  <tr key={product.id}>
+                    <td><span className="badge" style={{ backgroundColor: '#E0E7FF', color: 'var(--primary)' }}>{product.sku}</span></td>
+                    <td><input type="text" className="form-input" value={editForm.name} onChange={e => setEditForm({...editForm, name: e.target.value})} style={{ padding: '0.2rem', height: 'auto' }} /></td>
+                    <td><input type="number" className="form-input" value={editForm.stock_quantity} onChange={e => setEditForm({...editForm, stock_quantity: e.target.value})} style={{ padding: '0.2rem', height: 'auto', width: '80px' }} /></td>
+                    <td><input type="number" step="0.01" className="form-input" value={editForm.base_price} onChange={e => setEditForm({...editForm, base_price: e.target.value})} style={{ padding: '0.2rem', height: 'auto', width: '100px' }} /></td>
                     <td style={{ textAlign: 'right' }}>
-                      <button className="btn btn-outline" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }} onClick={() => handleAddStock(product)}>
-                        + Estoque
-                      </button>
+                      <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                        <button className="btn btn-success" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }} onClick={() => handleEditSave(product.id)}>Salvar</button>
+                        <button className="btn" style={{ backgroundColor: 'var(--danger)', color: 'white', padding: '0.2rem 0.5rem', fontSize: '0.75rem' }} onClick={handleEditCancel}>Cancelar</button>
+                      </div>
                     </td>
-                  )}
-                </tr>
+                  </tr>
+                ) : (
+                  <tr key={product.id}>
+                    <td><span className="badge" style={{ backgroundColor: '#E0E7FF', color: 'var(--primary)' }}>{product.sku}</span></td>
+                    <td style={{ fontWeight: 500 }}>{product.name}</td>
+                    <td>
+                      <span className={`badge ${product.stock_quantity > 0 ? 'badge-success' : ''}`} style={product.stock_quantity <= 0 ? { backgroundColor: 'var(--danger-bg)', color: 'var(--danger)' } : {}}>
+                        {product.stock_quantity} un.
+                      </span>
+                    </td>
+                    <td>R$ {Number(product.base_price).toFixed(2)}</td>
+                    {userRole === 'ADMIN' && (
+                      <td style={{ textAlign: 'right' }}>
+                        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                          <button className="btn btn-primary" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }} onClick={() => handleEditClick(product)}>
+                            Editar
+                          </button>
+                          <button className="btn btn-outline" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }} onClick={() => handleAddStock(product)}>
+                            + Estoque
+                          </button>
+                        </div>
+                      </td>
+                    )}
+                  </tr>
+                )
               ))}
               {!loading && products.length === 0 && (
                 <tr><td colSpan={userRole === 'ADMIN' ? 5 : 4} style={{ textAlign: 'center' }}>Nenhum produto cadastrado.</td></tr>

@@ -25,6 +25,7 @@ routes.use(authMiddleware);
 
 // Clients & Prices
 routes.get('/clients', ClientController.index);
+routes.post('/clients/bulk', ClientController.bulkStore);
 routes.post('/clients', ClientController.store);
 routes.put('/clients/:id', ClientController.update);
 
