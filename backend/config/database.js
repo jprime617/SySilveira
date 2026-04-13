@@ -11,4 +11,10 @@ module.exports = {
     timestamps: true,
     underscored: true,
   },
+  dialectOptions: process.env.DB_HOST && process.env.DB_HOST.includes('neon.tech') ? {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false
+    }
+  } : {}
 };
