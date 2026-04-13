@@ -6,6 +6,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingMsg, setLoadingMsg] = useState('Entrando...');
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
@@ -13,9 +14,17 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setLoadingMsg('Entrando...');
+
+    // Mostra mensagem sobre o cold-start do Render após 4 segundos
+    const longLoadTimer = setTimeout(() => {
+      setLoadingMsg('Iniciando servidor (pode demorar ~50s)...');
+    }, 4000);
 
     try {
       const response = await api.post('/sessions', { email, password });
+      clearTimeout(longLoadTimer);
+      
       const { token, user } = response.data;
       
       localStorage.setItem('@ERPLite:token', token);
@@ -23,10 +32,14 @@ const Login = () => {
       
       navigate('/');
     } catch (err) {
+      clearTimeout(longLoadTimer);
       if (err.response) {
         setError(err.response.data.error || 'Credenciais inválidas.');
       } else {
-        setError('Erro de conexão interno.');
+        // Melhora a visualização da real causa do erro
+        setError(err.message === 'Network Error' 
+          ? 'Erro de Rede (CORS ou Backend Offline). Confirme a URL.' 
+          : `Erro de conexão: ${err.message}`);
       }
     } finally {
       setLoading(false);
@@ -62,7 +75,7 @@ const Login = () => {
             />
           </div>
           <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }} disabled={loading}>
-            {loading ? 'Entrando...' : 'Entrar no Sistema'}
+            {loading ? loadingMsg : 'Entrar no Sistema'}
           </button>
         </form>
       </div>
