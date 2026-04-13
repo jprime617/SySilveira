@@ -12,6 +12,7 @@ const ClientPriceController = require('./controllers/ClientPriceController');
 const SaleController = require('./controllers/SaleController');
 const DeliveryPersonController = require('./controllers/DeliveryPersonController');
 const DeliveryReportController = require('./controllers/DeliveryReportController');
+const SystemController = require('./controllers/SystemController');
 
 // Health Check
 routes.get('/health', (req, res) => res.json({ status: 'ok' }));
@@ -51,5 +52,7 @@ routes.post('/products/bulk', ProductController.bulkStore);
 routes.post('/products', ProductController.store);
 routes.put('/products/:id', ProductController.update);
 routes.delete('/products/:id', ProductController.destroy);
+
+routes.delete('/system/cleanup', SystemController.cleanup);
 
 module.exports = routes;

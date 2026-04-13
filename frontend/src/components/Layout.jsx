@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, Users, ShoppingCart, Truck, LogOut, UserPlus, Bike } from 'lucide-react';
+import { LayoutDashboard, Package, Users, ShoppingCart, Truck, LogOut, UserPlus, Bike, FileText } from 'lucide-react';
 
 const Layout = ({ children }) => {
   const location = useLocation();
@@ -36,6 +36,9 @@ const Layout = ({ children }) => {
           </Link>
           <Link to="/users" className={`sidebar-item ${location.pathname === '/users' ? 'active' : ''}`}>
             <UserPlus size={20} /> Usuários
+          </Link>
+          <Link to="/reports" className={`sidebar-item ${location.pathname === '/reports' ? 'active' : ''}`}>
+            <FileText size={20} /> Relatórios Financeiros
           </Link>
           <Link to="/pos" className={`sidebar-item ${location.pathname === '/pos' ? 'active' : ''}`}>
              <ShoppingCart size={20} /> Vender (PDV)

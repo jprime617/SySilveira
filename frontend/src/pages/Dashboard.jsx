@@ -32,13 +32,43 @@ const Dashboard = () => {
 
   const totalRevenue = sales.reduce((acc, sale) => acc + Number(sale.total_price), 0);
 
+  const handleCleanup = async () => {
+    if (!window.confirm("Atenção: Esta ação vai varrer o banco de dados e excluir o histórico de TODAS as vendas e movimentos de estoque mais antigos que 12 meses. Esta ação é IRREVERSÍVEL. Tem certeza que deseja otimizar o banco?")) return;
+    
+    try {
+      const res = await api.delete('/system/cleanup');
+      alert(`Limpeza concluída! ${res.data.details.salesDeleted} vendas antigas de antes de ${new Date(res.data.details.cutoffDate).toLocaleDateString()} foram removidas para liberar espaço.`);
+      window.location.reload();
+    } catch (error) {
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        alert("Ação negada. Apenas Administradores podem limpar o banco de dados.");
+      } else {
+        alert("Erro ao tentar limpar o banco.");
+      }
+    }
+  };
+
+  // Pega o usuário do localStorage para verificar se é admin
+  const userStr = localStorage.getItem('@ERPLite:user');
+  const user = userStr ? JSON.parse(userStr) : null;
+  const isAdmin = user && user.role === 'ADMIN';
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <h3 style={{ fontWeight: 600 }}>Visão Geral</h3>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <label style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-muted)' }}>Filtrar Data:</label>
-          <input type="date" className="form-input" value={filterDate} onChange={e => setFilterDate(e.target.value)} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          
+          {isAdmin && (
+            <button className="btn btn-outline" style={{ borderColor: 'var(--danger)', color: 'var(--danger)', fontSize: '0.8rem', padding: '0.3rem 0.6rem' }} onClick={handleCleanup}>
+              Limpar Dados Antigos (&gt; 1 ano)
+            </button>
+          )}
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <label style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-muted)' }}>Filtrar Data:</label>
+            <input type="date" className="form-input" value={filterDate} onChange={e => setFilterDate(e.target.value)} />
+          </div>
         </div>
       </div>
 
