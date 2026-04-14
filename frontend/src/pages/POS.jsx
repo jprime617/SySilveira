@@ -359,7 +359,8 @@ const POS = () => {
             </div>
 
             <div style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.875rem' }}>
-                Obrigado pela preferência!
+                Obrigado pela preferência!<br />
+                <strong>Contato: (48) 33570478</strong>
             </div>
 
 
