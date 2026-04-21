@@ -164,7 +164,7 @@ const Clients = () => {
         )}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: userRole === 'ADMIN' ? '1fr 1fr' : '1fr', gap: '2rem', marginTop: '1.5rem', marginBottom: '2rem' }}>
+      <div className={`admin-forms-grid ${userRole === 'ADMIN' ? 'admin-role' : ''}`} style={{ gap: '2rem', marginTop: '1.5rem', marginBottom: '2rem' }}>
         {/* Cliente Form */}
         <div className="card">
           <h4 style={{ marginBottom: '1rem', color: 'var(--text-muted)' }}>Novo Cliente</h4>

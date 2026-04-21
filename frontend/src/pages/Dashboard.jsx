@@ -60,7 +60,7 @@ const Dashboard = () => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           
           {isAdmin && (
-            <button className="btn btn-outline" style={{ borderColor: 'var(--danger)', color: 'var(--danger)', fontSize: '0.8rem', padding: '0.3rem 0.6rem' }} onClick={handleCleanup}>
+            <button className="btn btn-outline hide-on-mobile" style={{ borderColor: 'var(--danger)', color: 'var(--danger)', fontSize: '0.8rem', padding: '0.3rem 0.6rem' }} onClick={handleCleanup}>
               Limpar Dados Antigos (&gt; 1 ano)
             </button>
           )}
@@ -73,21 +73,21 @@ const Dashboard = () => {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
-        <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ backgroundColor: 'var(--primary)', color: 'white', padding: '1rem', borderRadius: 'var(--radius-md)' }}><ShoppingCart size={24} /></div>
-          <div><p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', fontWeight: 500 }}>Total de Vendas</p><h3 style={{ fontSize: '1.5rem', fontWeight: 700 }}>{sales.length}</h3></div>
+        <div className="card metric-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div className="metric-icon" style={{ backgroundColor: 'var(--primary)', color: 'white', padding: '1rem', borderRadius: 'var(--radius-md)' }}><ShoppingCart size={24} /></div>
+          <div><p className="metric-title" style={{ color: 'var(--text-muted)', fontSize: '0.875rem', fontWeight: 500 }}>Total de Vendas</p><h3 className="metric-value" style={{ fontSize: '1.5rem', fontWeight: 700 }}>{sales.length}</h3></div>
         </div>
-        <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ backgroundColor: 'var(--success)', color: 'white', padding: '1rem', borderRadius: 'var(--radius-md)' }}><TrendingUp size={24} /></div>
-          <div><p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', fontWeight: 500 }}>Faturamento</p><h3 style={{ fontSize: '1.5rem', fontWeight: 700 }}>R$ {totalRevenue.toFixed(2)}</h3></div>
+        <div className="card metric-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div className="metric-icon" style={{ backgroundColor: 'var(--success)', color: 'white', padding: '1rem', borderRadius: 'var(--radius-md)' }}><TrendingUp size={24} /></div>
+          <div><p className="metric-title" style={{ color: 'var(--text-muted)', fontSize: '0.875rem', fontWeight: 500 }}>Faturamento</p><h3 className="metric-value" style={{ fontSize: '1.5rem', fontWeight: 700 }}>R$ {totalRevenue.toFixed(2)}</h3></div>
         </div>
-        <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ backgroundColor: 'var(--warning)', color: 'white', padding: '1rem', borderRadius: 'var(--radius-md)' }}><Users size={24} /></div>
-          <div><p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', fontWeight: 500 }}>Clientes Cadastrados</p><h3 style={{ fontSize: '1.5rem', fontWeight: 700 }}>{clientsCount}</h3></div>
+        <div className="card metric-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div className="metric-icon" style={{ backgroundColor: 'var(--warning)', color: 'white', padding: '1rem', borderRadius: 'var(--radius-md)' }}><Users size={24} /></div>
+          <div><p className="metric-title" style={{ color: 'var(--text-muted)', fontSize: '0.875rem', fontWeight: 500 }}>Clientes Cadastrados</p><h3 className="metric-value" style={{ fontSize: '1.5rem', fontWeight: 700 }}>{clientsCount}</h3></div>
         </div>
-        <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ backgroundColor: '#8B5CF6', color: 'white', padding: '1rem', borderRadius: 'var(--radius-md)' }}><Package size={24} /></div>
-          <div><p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', fontWeight: 500 }}>Produtos Disponíveis</p><h3 style={{ fontSize: '1.5rem', fontWeight: 700 }}>{productsCount}</h3></div>
+        <div className="card metric-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div className="metric-icon" style={{ backgroundColor: '#8B5CF6', color: 'white', padding: '1rem', borderRadius: 'var(--radius-md)' }}><Package size={24} /></div>
+          <div><p className="metric-title" style={{ color: 'var(--text-muted)', fontSize: '0.875rem', fontWeight: 500 }}>Produtos Disponíveis</p><h3 className="metric-value" style={{ fontSize: '1.5rem', fontWeight: 700 }}>{productsCount}</h3></div>
         </div>
       </div>
 

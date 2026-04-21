@@ -152,7 +152,7 @@ const POS = () => {
     <div>
       {/* Area TELA PADRAO */}
       <div className="no-print">
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+        <div className="pos-grid" style={{ gap: '2rem' }}>
           
           {/* Coluna 1: Formulário e Produtos */}
           <div>

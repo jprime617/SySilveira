@@ -225,6 +225,20 @@ tr:hover td {
   padding: 2rem;
 }
 
+/* Grids que serão 1fr no mobile */
+.admin-forms-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+.admin-forms-grid.admin-role {
+  grid-template-columns: 1fr 1fr;
+}
+
+.pos-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
 /* ====== RESPONSIVE (MOBILE & TABLET) ======= */
 @media (max-width: 768px) {
   html {
@@ -305,6 +319,34 @@ tr:hover td {
   form .btn {
     width: 100%;
     margin-top: 0.5rem;
+  }
+
+  /* Ocultar elementos específicos no mobile */
+  .hide-on-mobile {
+    display: none !important;
+  }
+
+  /* Reduzir os quadros do Dashboard */
+  .metric-card {
+    padding: 0.75rem !important;
+  }
+  .metric-card .metric-icon {
+    padding: 0.5rem !important;
+  }
+  .metric-card .metric-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+  .metric-card .metric-title {
+    font-size: 0.75rem !important;
+  }
+  .metric-card .metric-value {
+    font-size: 1.1rem !important;
+  }
+
+  /* Forçar 1 coluna em todas as grids problemáticas */
+  .admin-forms-grid, .pos-grid {
+    grid-template-columns: 1fr !important;
   }
 }
 
