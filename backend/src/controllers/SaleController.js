@@ -66,6 +66,7 @@ module.exports = {
           product_id: item.product_id,
           quantity: item.quantity,
           price_sold,
+          is_cold: item.is_cold || false,
         });
       }
 
@@ -160,6 +161,7 @@ module.exports = {
           product_id: item.product_id,
           quantity: item.quantity,
           price_sold,
+          is_cold: item.is_cold || false,
           sale_id: sale.id // link directly to existing sale
         });
       }

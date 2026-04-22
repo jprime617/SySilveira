@@ -26,21 +26,31 @@ module.exports = {
         }
 
         // Phone might be null but we want it as identifier if provided.
-        // If there's no phone, we could search by name. The plan asks to use phone.
+        // We also check by lowercase name to avoid unique constraint errors.
+        const cleanName = name.trim();
         let existingClient = null;
+
         if (phone && phone.trim() !== '') {
           existingClient = await Client.findOne({ where: { phone }, transaction });
         }
 
+        if (!existingClient) {
+          existingClient = await Client.findOne({ 
+            where: Sequelize.where(Sequelize.fn('lower', Sequelize.fn('trim', Sequelize.col('name'))), cleanName.toLowerCase()), 
+            transaction 
+          });
+        }
+
         if (existingClient) {
           await existingClient.update({
-            name,
-            address: address || existingClient.address
+            name: cleanName,
+            address: address || existingClient.address,
+            phone: phone || existingClient.phone
           }, { transaction });
           results.updated += 1;
         } else {
           await Client.create({
-            name,
+            name: cleanName,
             phone: phone || null,
             address: address || null
           }, { transaction });
@@ -60,21 +70,44 @@ module.exports = {
 
   async store(req, res) {
     const { name, address, phone } = req.body;
+    const { Sequelize } = require('sequelize');
 
-    const client = await Client.create({ name, address, phone });
+    const cleanName = name.trim();
+    const existing = await Client.findOne({
+       where: Sequelize.where(Sequelize.fn('lower', Sequelize.fn('trim', Sequelize.col('name'))), cleanName.toLowerCase())
+    });
+
+    if (existing) {
+       return res.status(400).json({ error: 'Um cliente com este nome já existe.' });
+    }
+
+    const client = await Client.create({ name: cleanName, address, phone });
     return res.json(client);
   },
 
   async update(req, res) {
     const { id } = req.params;
     const { name, address, phone } = req.body;
+    const { Sequelize, Op } = require('sequelize');
 
     const client = await Client.findByPk(id);
     if (!client) {
       return res.status(404).json({ error: 'Client not found' });
     }
 
-    await client.update({ name, address, phone });
+    const cleanName = name.trim();
+    const existing = await Client.findOne({
+       where: {
+         id: { [Op.ne]: id },
+         [Op.and]: Sequelize.where(Sequelize.fn('lower', Sequelize.fn('trim', Sequelize.col('name'))), cleanName.toLowerCase())
+       }
+    });
+
+    if (existing) {
+       return res.status(400).json({ error: 'Outro cliente com este nome já existe.' });
+    }
+
+    await client.update({ name: cleanName, address, phone });
     return res.json(client);
   },
 

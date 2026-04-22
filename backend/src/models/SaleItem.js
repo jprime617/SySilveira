@@ -10,6 +10,11 @@ class SaleItem extends Model {
       price_sold: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
+      },
+      is_cold: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
       }
     }, {
       sequelize,

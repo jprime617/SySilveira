@@ -54,7 +54,8 @@ const EditSale = () => {
                 quantity: saleItem.quantity,
                 price: Number(saleItem.price_sold || saleItem.price || 0), // Use exactly what was sold
                 originalPrice: Number(productFull.base_price || 0),
-                isSmartPrice: Number(saleItem.price_sold) !== Number(productFull.base_price)
+                isSmartPrice: Number(saleItem.price_sold) !== Number(productFull.base_price),
+                isCold: saleItem.is_cold || false
               };
             });
             setCart(reconstructedCart);
@@ -141,7 +142,7 @@ const EditSale = () => {
         delivery_person_id: deliveryType === 'PICKUP' ? null : (deliveryPersonId || null),
         delivery_type: deliveryType,
         frontend_total: cartTotals.totalPrice, // Dual-validation
-        items: cart.map(item => ({ product_id: item.product.id, quantity: item.quantity, override_price: Number(item.price) }))
+        items: cart.map(item => ({ product_id: item.product.id, quantity: item.quantity, override_price: Number(item.price), is_cold: item.isCold }))
       };
       
       const res = await api.put(`/sales/${id}`, payload, { headers: { 'Cache-Control': 'no-cache' } });

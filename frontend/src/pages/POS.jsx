@@ -112,7 +112,7 @@ const POS = () => {
         delivery_person_id: deliveryType === 'PICKUP' ? null : (deliveryPersonId || null),
         delivery_type: deliveryType,
         frontend_total: cartTotals.totalPrice, // Dual-validation
-        items: cart.map(item => ({ product_id: item.product.id, quantity: item.quantity, override_price: Number(item.price) }))
+        items: cart.map(item => ({ product_id: item.product.id, quantity: item.quantity, override_price: Number(item.price), is_cold: item.isCold }))
       };
       
       const res = await api.post('/sales', payload, { headers: { 'Cache-Control': 'no-cache' } });
