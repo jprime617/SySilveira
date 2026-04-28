@@ -37,13 +37,19 @@ const POS = () => {
         const loadedClients = Array.isArray(cRes.data) ? cRes.data : [];
         setClients(loadedClients);
         setProducts(Array.isArray(pRes.data) ? pRes.data : []);
-        setDeliveryPeople(Array.isArray(dRes.data) ? dRes.data : []);
+        const loadedDelivery = Array.isArray(dRes.data) ? dRes.data : [];
+        setDeliveryPeople(loadedDelivery);
 
         if (isMarketWorker) {
           const mercadoClient = loadedClients.find(c => c.name.toLowerCase().includes('mercado'));
           if (mercadoClient) {
             setClientId(mercadoClient.id);
           }
+          const mercadoDelivery = loadedDelivery.find(d => d.name.toLowerCase().includes('mercado'));
+          if (mercadoDelivery) {
+            setDeliveryPersonId(mercadoDelivery.id);
+          }
+          setDeliveryType('DELIVERY');
         }
       } catch (err) {
         console.error(err);
@@ -170,32 +176,43 @@ const POS = () => {
           {/* Coluna 1: Formulário e Produtos */}
           <div>
             <div className="card" style={{ marginBottom: '1.5rem' }}>
-              <h4 style={{ marginBottom: '1rem', color: 'var(--primary)' }}>1. Selecione o Cliente</h4>
-              <SearchableSelect 
-                options={clients.map(c => ({ id: c.id, label: c.name }))}
-                value={clientId}
-                onChange={id => { setClientId(id); setCart([]); }}
-                placeholder="Busque o cliente pelo nome..."
-              />
-              <p style={{ fontSize: '0.75rem', color: 'var(--warning)', marginTop: '0.5rem', marginBottom: '1rem' }}>* O cliente afeta o preço do produto.</p>
-
-              <h4 style={{ marginBottom: '1rem', color: 'var(--primary)', marginTop: '1rem' }}>Logística de Entrega</h4>
-              <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                  <input type="radio" name="deliveryType" checked={deliveryType === 'DELIVERY'} onChange={() => setDeliveryType('DELIVERY')} /> Entrega (Motoboy)
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                  <input type="radio" name="deliveryType" checked={deliveryType === 'PICKUP'} onChange={() => { setDeliveryType('PICKUP'); setDeliveryPersonId(''); }} /> Retirada no Local
-                </label>
-              </div>
-
-              {deliveryType === 'DELIVERY' && (
+              {isMarketWorker ? (
+                <div style={{ textAlign: 'center', padding: '1rem 0' }}>
+                  <h4 style={{ color: 'var(--primary)', marginBottom: '0.5rem' }}>Transferência de Estoque</h4>
+                  <p style={{ color: 'var(--text-muted)' }}>Destino: Mercado | Transporte: Mercado</p>
+                  {!clientId && <p style={{ color: 'var(--danger)', fontSize: '0.875rem', marginTop: '0.5rem' }}>Atenção: Cliente "Mercado" não encontrado. Crie o cliente no painel.</p>}
+                  {!deliveryPersonId && <p style={{ color: 'var(--danger)', fontSize: '0.875rem', marginTop: '0.5rem' }}>Atenção: Motoboy "Mercado" não encontrado. Crie-o no painel.</p>}
+                </div>
+              ) : (
                 <>
-                  <h4 style={{ marginBottom: '1rem', color: 'var(--primary)', marginTop: '0.5rem' }}>Entregador (Opcional)</h4>
-                  <select className="form-select" value={deliveryPersonId} onChange={e => setDeliveryPersonId(e.target.value)} style={{ width: '100%' }}>
-                    <option value="">Selecione o Entregador</option>
-                    {deliveryPeople.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
-                  </select>
+                  <h4 style={{ marginBottom: '1rem', color: 'var(--primary)' }}>1. Selecione o Cliente</h4>
+                  <SearchableSelect 
+                    options={clients.map(c => ({ id: c.id, label: c.name }))}
+                    value={clientId}
+                    onChange={id => { setClientId(id); setCart([]); }}
+                    placeholder="Busque o cliente pelo nome..."
+                  />
+                  <p style={{ fontSize: '0.75rem', color: 'var(--warning)', marginTop: '0.5rem', marginBottom: '1rem' }}>* O cliente afeta o preço do produto.</p>
+
+                  <h4 style={{ marginBottom: '1rem', color: 'var(--primary)', marginTop: '1rem' }}>Logística de Entrega</h4>
+                  <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                      <input type="radio" name="deliveryType" checked={deliveryType === 'DELIVERY'} onChange={() => setDeliveryType('DELIVERY')} /> Entrega (Motoboy)
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                      <input type="radio" name="deliveryType" checked={deliveryType === 'PICKUP'} onChange={() => { setDeliveryType('PICKUP'); setDeliveryPersonId(''); }} /> Retirada no Local
+                    </label>
+                  </div>
+
+                  {deliveryType === 'DELIVERY' && (
+                    <>
+                      <h4 style={{ marginBottom: '1rem', color: 'var(--primary)', marginTop: '0.5rem' }}>Entregador (Opcional)</h4>
+                      <select className="form-select" value={deliveryPersonId} onChange={e => setDeliveryPersonId(e.target.value)} style={{ width: '100%' }}>
+                        <option value="">Selecione o Entregador</option>
+                        {deliveryPeople.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                      </select>
+                    </>
+                  )}
                 </>
               )}
             </div>
