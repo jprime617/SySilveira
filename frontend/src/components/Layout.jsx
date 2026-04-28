@@ -52,6 +52,9 @@ const Layout = ({ children }) => {
               <Link to="/reports" className={`sidebar-item ${location.pathname === '/reports' ? 'active' : ''}`} onClick={() => setIsSidebarOpen(false)}>
                 <FileText size={20} /> Relatórios Financeiros
               </Link>
+              <Link to="/sales" className={`sidebar-item ${location.pathname === '/sales' ? 'active' : ''}`} onClick={() => setIsSidebarOpen(false)}>
+                <FileText size={20} /> Revisar Notas
+              </Link>
             </>
           )}
           <Link to="/pos" className={`sidebar-item ${location.pathname === '/pos' ? 'active' : ''}`} onClick={() => setIsSidebarOpen(false)}>

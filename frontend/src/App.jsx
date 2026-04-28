@@ -13,6 +13,7 @@ import EditSale from './pages/EditSale';
 import DeliveryPeople from './pages/DeliveryPeople';
 import Users from './pages/Users';
 import Reports from './pages/Reports';
+import SalesList from './pages/SalesList';
 
 import AuditLogs from './pages/AuditLogs';
 
@@ -41,6 +42,7 @@ function App() {
         <Route path="/clients" element={<PrivateRoute><Clients /></PrivateRoute>} />
         <Route path="/logistics" element={<PrivateRoute><Logistics /></PrivateRoute>} />
         <Route path="/pos" element={<PrivateRoute><POS /></PrivateRoute>} />
+        <Route path="/sales" element={<PrivateRoute><SalesList /></PrivateRoute>} />
         <Route path="/edit-sale/:id" element={<PrivateRoute><EditSale /></PrivateRoute>} />
         <Route path="/delivery-people" element={<PrivateRoute><DeliveryPeople /></PrivateRoute>} />
         <Route path="/users" element={<PrivateRoute><Users /></PrivateRoute>} />

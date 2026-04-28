@@ -91,41 +91,12 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="card">
-        <h3 style={{ marginBottom: '1rem', fontWeight: 600 }}>Últimas Vendas</h3>
-        <div className="table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>Data</th>
-                <th>Cliente</th>
-                <th>Entregador</th>
-                <th>Itens</th>
-                <th>Valor Total</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sales.map(sale => (
-                <tr key={sale.id}>
-                  <td>{new Date(sale.date).toLocaleDateString()}</td>
-                  <td>{sale.client?.name}</td>
-                  <td>{sale.delivery_person?.name || 'Retirada'}</td>
-                  <td>{sale.items.length}</td>
-                  <td style={{ fontWeight: 600, color: 'var(--success)' }}>R$ {Number(sale.total_price).toFixed(2)}</td>
-                  <td>
-                    <Link to={`/edit-sale/${sale.id}`} className="btn btn-outline" style={{ padding: '0.2rem 0.5rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.75rem', textDecoration: 'none' }}>
-                      <Edit size={14} /> Revisar
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-              {sales.length === 0 && (
-                <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Nenhuma venda registrada ainda.</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+      <div style={{ textAlign: 'center', marginTop: '2rem', padding: '2rem', background: 'var(--card-bg)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+        <h3 style={{ marginBottom: '1rem', color: 'var(--text-color)' }}>Gerenciamento de Notas</h3>
+        <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>Para revisar, editar ou consultar o histórico completo de notas geradas no sistema, acesse a nova página de revisão.</p>
+        <Link to="/sales" className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
+          <Edit size={18} /> Acessar Revisão de Notas
+        </Link>
       </div>
     </div>
   );
