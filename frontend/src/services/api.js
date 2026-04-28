@@ -62,6 +62,13 @@ api.interceptors.response.use(
       clearTimeout(renderHibernationTimer);
       removeLoader();
     }
+    
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem('@ERPLite:token');
+      localStorage.removeItem('@ERPLite:user');
+      window.location.href = '/login';
+    }
+
     return Promise.reject(error);
   }
 );

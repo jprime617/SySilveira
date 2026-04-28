@@ -13,6 +13,8 @@ const SaleController = require('./controllers/SaleController');
 const DeliveryPersonController = require('./controllers/DeliveryPersonController');
 const DeliveryReportController = require('./controllers/DeliveryReportController');
 const SystemController = require('./controllers/SystemController');
+const AuditLogController = require('./controllers/AuditLogController');
+const auditMiddleware = require('./middlewares/auditMiddleware');
 
 // Health Check
 routes.get('/health', (req, res) => res.json({ status: 'ok' }));
@@ -23,6 +25,9 @@ routes.post('/sessions', SessionController.store);
 
 // Authenticated routes require JWT
 routes.use(authMiddleware);
+
+// Audit logging middleware - must come after authMiddleware to have req.userId
+routes.use(auditMiddleware);
 
 // Clients & Prices
 routes.get('/clients', ClientController.index);
@@ -52,6 +57,8 @@ routes.post('/products/bulk', ProductController.bulkStore);
 routes.post('/products', ProductController.store);
 routes.put('/products/:id', ProductController.update);
 routes.delete('/products/:id', ProductController.destroy);
+
+routes.get('/audit_logs', AuditLogController.index);
 
 routes.delete('/system/cleanup', SystemController.cleanup);
 

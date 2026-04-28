@@ -10,6 +10,7 @@ const DeliveryPerson = require('../models/DeliveryPerson');
 const Sale = require('../models/Sale');
 const SaleItem = require('../models/SaleItem');
 const StockMovement = require('../models/StockMovement');
+const AuditLog = require('../models/AuditLog');
 
 const connection = new Sequelize(dbConfig);
 
@@ -23,6 +24,7 @@ const models = [
   Sale,
   SaleItem,
   StockMovement,
+  AuditLog,
 ];
 
 models.forEach(model => model.init(connection));
