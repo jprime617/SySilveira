@@ -47,7 +47,10 @@ function AuditLogs() {
             {logs.map(log => (
               <tr key={log.id} style={{ borderBottom: '1px solid var(--border)' }}>
                 <td style={{ padding: '0.75rem', whiteSpace: 'nowrap' }}>
-                  {new Date(log.created_at).toLocaleString()}
+                  {(() => {
+                    const d = new Date(log.createdAt || log.created_at);
+                    return isNaN(d.getTime()) ? 'Data Inválida' : d.toLocaleString();
+                  })()}
                 </td>
                 <td style={{ padding: '0.75rem' }}>
                   {log.user ? `${log.user.name} (${log.user.role})` : 'Sistema / Anônimo'}

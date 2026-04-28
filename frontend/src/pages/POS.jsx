@@ -147,8 +147,18 @@ const POS = () => {
       });
 
       setCart([]);
-      setClientId('');
-      setDeliveryPersonId('');
+      
+      if (isMarketWorker) {
+        const mercadoClient = clients.find(c => c.name.toLowerCase().includes('mercado'));
+        if (mercadoClient) setClientId(mercadoClient.id);
+        
+        const mercadoDelivery = deliveryPeople.find(d => d.name.toLowerCase().includes('mercado'));
+        if (mercadoDelivery) setDeliveryPersonId(mercadoDelivery.id);
+      } else {
+        setClientId('');
+        setDeliveryPersonId('');
+      }
+      
       setDeliveryType('DELIVERY');
 
       // Refresh products to update stock
