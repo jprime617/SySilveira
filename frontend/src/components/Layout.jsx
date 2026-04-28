@@ -7,6 +7,9 @@ const Layout = ({ children }) => {
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  let user = null;
+  try { user = JSON.parse(localStorage.getItem('@ERPLite:user') || '{}'); } catch (e) {}
+
   const handleLogout = () => {
     localStorage.removeItem('@ERPLite:token');
     localStorage.removeItem('@ERPLite:user');
@@ -26,29 +29,33 @@ const Layout = ({ children }) => {
           ERP Lite
         </div>
         <nav style={{ flex: 1, padding: '1rem 0' }}>
-          <Link to="/" className={`sidebar-item ${location.pathname === '/' ? 'active' : ''}`} onClick={() => setIsSidebarOpen(false)}>
-            <LayoutDashboard size={20} /> Dashboard
-          </Link>
-          <Link to="/products" className={`sidebar-item ${location.pathname === '/products' ? 'active' : ''}`} onClick={() => setIsSidebarOpen(false)}>
-            <Package size={20} /> Produtos
-          </Link>
-          <Link to="/clients" className={`sidebar-item ${location.pathname === '/clients' ? 'active' : ''}`} onClick={() => setIsSidebarOpen(false)}>
-            <Users size={20} /> Clientes
-          </Link>
-          <Link to="/logistics" className={`sidebar-item ${location.pathname === '/logistics' ? 'active' : ''}`} onClick={() => setIsSidebarOpen(false)}>
-            <Truck size={20} /> Logística
-          </Link>
-          <Link to="/delivery-people" className={`sidebar-item ${location.pathname === '/delivery-people' ? 'active' : ''}`} onClick={() => setIsSidebarOpen(false)}>
-            <Bike size={20} /> Motoboys
-          </Link>
-          <Link to="/users" className={`sidebar-item ${location.pathname === '/users' ? 'active' : ''}`} onClick={() => setIsSidebarOpen(false)}>
-            <UserPlus size={20} /> Usuários
-          </Link>
-          <Link to="/reports" className={`sidebar-item ${location.pathname === '/reports' ? 'active' : ''}`} onClick={() => setIsSidebarOpen(false)}>
-            <FileText size={20} /> Relatórios Financeiros
-          </Link>
+          {user?.role !== 'MARKET_WORKER' && (
+            <>
+              <Link to="/" className={`sidebar-item ${location.pathname === '/' ? 'active' : ''}`} onClick={() => setIsSidebarOpen(false)}>
+                <LayoutDashboard size={20} /> Dashboard
+              </Link>
+              <Link to="/products" className={`sidebar-item ${location.pathname === '/products' ? 'active' : ''}`} onClick={() => setIsSidebarOpen(false)}>
+                <Package size={20} /> Produtos
+              </Link>
+              <Link to="/clients" className={`sidebar-item ${location.pathname === '/clients' ? 'active' : ''}`} onClick={() => setIsSidebarOpen(false)}>
+                <Users size={20} /> Clientes
+              </Link>
+              <Link to="/logistics" className={`sidebar-item ${location.pathname === '/logistics' ? 'active' : ''}`} onClick={() => setIsSidebarOpen(false)}>
+                <Truck size={20} /> Logística
+              </Link>
+              <Link to="/delivery-people" className={`sidebar-item ${location.pathname === '/delivery-people' ? 'active' : ''}`} onClick={() => setIsSidebarOpen(false)}>
+                <Bike size={20} /> Motoboys
+              </Link>
+              <Link to="/users" className={`sidebar-item ${location.pathname === '/users' ? 'active' : ''}`} onClick={() => setIsSidebarOpen(false)}>
+                <UserPlus size={20} /> Usuários
+              </Link>
+              <Link to="/reports" className={`sidebar-item ${location.pathname === '/reports' ? 'active' : ''}`} onClick={() => setIsSidebarOpen(false)}>
+                <FileText size={20} /> Relatórios Financeiros
+              </Link>
+            </>
+          )}
           <Link to="/pos" className={`sidebar-item ${location.pathname === '/pos' ? 'active' : ''}`} onClick={() => setIsSidebarOpen(false)}>
-             <ShoppingCart size={20} /> Vender (PDV)
+             <ShoppingCart size={20} /> {user?.role === 'MARKET_WORKER' ? 'Transferência' : 'Vender (PDV)'}
           </Link>
         </nav>
         <div style={{ padding: '1rem' }}>

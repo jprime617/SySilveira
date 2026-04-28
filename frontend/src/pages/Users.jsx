@@ -74,6 +74,7 @@ const Users = () => {
                 required
             >
                 <option value="USER">Funcionário Comum (USER)</option>
+                <option value="MARKET_WORKER">Funcionário do Mercado (Apenas Transferências)</option>
                 <option value="ADMIN">Administrador Deste Sistema (ADMIN)</option>
             </select>
           </div>

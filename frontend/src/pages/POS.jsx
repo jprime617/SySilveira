@@ -21,6 +21,11 @@ const POS = () => {
 
   const [lastSale, setLastSale] = useState(null);
 
+  const userString = localStorage.getItem('@ERPLite:user');
+  let user = null;
+  try { user = JSON.parse(userString); } catch (e) {}
+  const isMarketWorker = user?.role === 'MARKET_WORKER';
+
   useEffect(() => {
     async function loadData() {
       try {
@@ -29,9 +34,17 @@ const POS = () => {
           api.get('/products'),
           api.get('/delivery_people')
         ]);
-        setClients(Array.isArray(cRes.data) ? cRes.data : []);
+        const loadedClients = Array.isArray(cRes.data) ? cRes.data : [];
+        setClients(loadedClients);
         setProducts(Array.isArray(pRes.data) ? pRes.data : []);
         setDeliveryPeople(Array.isArray(dRes.data) ? dRes.data : []);
+
+        if (isMarketWorker) {
+          const mercadoClient = loadedClients.find(c => c.name.toLowerCase().includes('mercado'));
+          if (mercadoClient) {
+            setClientId(mercadoClient.id);
+          }
+        }
       } catch (err) {
         console.error(err);
       } finally {
@@ -231,44 +244,48 @@ const POS = () => {
                     <tr key={index} style={{ borderBottom: '1px solid var(--border)' }}>
                       <td style={{ padding: '0.5rem 0' }}>{item.quantity}x</td>
                       <td style={{ padding: '0.5rem 0' }}>{item.product.name} {item.isCold && <span style={{ color: '#0284c7', fontSize: '0.75rem', fontWeight: 'bold' }}>(GELADO)</span>}</td>
-                      <td style={{ padding: '0.5rem 0', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-                          <span style={{ color: item.isSmartPrice ? 'var(--danger)' : 'var(--text-muted)', fontWeight: item.isSmartPrice ? 'bold' : 'normal' }}>R$</span>
-                          <input 
-                            type="number"
-                            step="0.01"
-                            className="form-input"
-                            style={{ 
-                              padding: '0.1rem 0.3rem', 
-                              height: '24px', 
-                              width: '70px', 
-                              fontSize: '0.875rem',
-                              color: item.isSmartPrice ? 'var(--danger)' : 'inherit',
-                              fontWeight: item.isSmartPrice ? 'bold' : 'normal'
-                            }}
-                            value={item.price}
-                            onChange={(e) => {
-                              const newCart = [...cart];
-                              newCart[index].price = e.target.value;
-                              setCart(newCart);
-                            }}
-                          />
-                        </div>
-                        {item.isSmartPrice && (
-                          <div style={{ fontSize: '0.7rem', marginTop: '0.2rem' }}>
-                             <span style={{ color: 'var(--danger)' }}>(Preço Especial)</span><br/>
-                             <button type="button" style={{ background: 'none', border: 'none', color: 'var(--primary)', textDecoration: 'underline', cursor: 'pointer', padding: 0 }} onClick={() => {
-                               const newCart = [...cart];
-                               newCart[index].price = newCart[index].originalPrice;
-                               newCart[index].isSmartPrice = false;
-                               setCart(newCart);
-                             }}>
-                               Reverter Base
-                             </button>
-                          </div>
-                        )}
-                      </td>
-                      <td style={{ padding: '0.5rem 0', fontWeight: 600 }}>{(Number(item.price) * Number(item.quantity)).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</td>
+                      {!isMarketWorker && (
+                        <>
+                          <td style={{ padding: '0.5rem 0', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                              <span style={{ color: item.isSmartPrice ? 'var(--danger)' : 'var(--text-muted)', fontWeight: item.isSmartPrice ? 'bold' : 'normal' }}>R$</span>
+                              <input 
+                                type="number"
+                                step="0.01"
+                                className="form-input"
+                                style={{ 
+                                  padding: '0.1rem 0.3rem', 
+                                  height: '24px', 
+                                  width: '70px', 
+                                  fontSize: '0.875rem',
+                                  color: item.isSmartPrice ? 'var(--danger)' : 'inherit',
+                                  fontWeight: item.isSmartPrice ? 'bold' : 'normal'
+                                }}
+                                value={item.price}
+                                onChange={(e) => {
+                                  const newCart = [...cart];
+                                  newCart[index].price = e.target.value;
+                                  setCart(newCart);
+                                }}
+                              />
+                            </div>
+                            {item.isSmartPrice && (
+                              <div style={{ fontSize: '0.7rem', marginTop: '0.2rem' }}>
+                                 <span style={{ color: 'var(--danger)' }}>(Preço Especial)</span><br/>
+                                 <button type="button" style={{ background: 'none', border: 'none', color: 'var(--primary)', textDecoration: 'underline', cursor: 'pointer', padding: 0 }} onClick={() => {
+                                   const newCart = [...cart];
+                                   newCart[index].price = newCart[index].originalPrice;
+                                   newCart[index].isSmartPrice = false;
+                                   setCart(newCart);
+                                 }}>
+                                   Reverter Base
+                                 </button>
+                              </div>
+                            )}
+                          </td>
+                          <td style={{ padding: '0.5rem 0', fontWeight: 600 }}>{(Number(item.price) * Number(item.quantity)).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</td>
+                        </>
+                      )}
                       <td style={{ padding: '0.5rem 0', textAlign: 'right' }}>
                          <button type="button" className="btn btn-outline" style={{ padding: '0.2rem 0.5rem', color: 'var(--danger)' }} onClick={() => removeFromCart(index)}><Trash2 size={14} /></button>
                       </td>
@@ -279,10 +296,12 @@ const POS = () => {
               )}
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', fontSize: '1.25rem', fontWeight: 700 }}>
-              <span>Total:</span>
-              <span style={{ color: 'var(--primary)' }}>{cartTotals.totalPrice.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</span>
-            </div>
+            {!isMarketWorker && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', fontSize: '1.25rem', fontWeight: 700 }}>
+                <span>Total:</span>
+                <span style={{ color: 'var(--primary)' }}>{cartTotals.totalPrice.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</span>
+              </div>
+            )}
 
             <button className="btn btn-primary" style={{ width: '100%', padding: '1rem', cursor: isSubmitting ? 'not-allowed' : 'pointer' }} onClick={handleCheckout} disabled={cart.length === 0 || isSubmitting}>
               {isSubmitting ? (
@@ -338,8 +357,12 @@ const POS = () => {
                 <tr>
                   <th style={{ padding: '0.4rem 0', textAlign: 'left' }}>QTD</th>
                   <th style={{ padding: '0.4rem 0', textAlign: 'left' }}>ITEM</th>
-                  <th style={{ padding: '0.4rem 0', textAlign: 'right' }}>V.UN</th>
-                  <th style={{ padding: '0.4rem 0', textAlign: 'right' }}>TOTAL</th>
+                  {!isMarketWorker && (
+                    <>
+                      <th style={{ padding: '0.4rem 0', textAlign: 'right' }}>V.UN</th>
+                      <th style={{ padding: '0.4rem 0', textAlign: 'right' }}>TOTAL</th>
+                    </>
+                  )}
                 </tr>
               </thead>
               <tbody>
@@ -347,16 +370,22 @@ const POS = () => {
                   <tr key={idx}>
                     <td style={{ padding: '0.2rem 0', fontWeight: 'bold' }}>{item?.quantity || 1}</td>
                     <td style={{ padding: '0.2rem 0', fontWeight: 'bold' }}>{item?.product?.name || 'Produto'} {item?.isCold ? '❄️(GELADO)' : ''}</td>
-                    <td style={{ padding: '0.2rem 0', textAlign: 'right' }}>{Number(item?.price || 0).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</td>
-                    <td style={{ padding: '0.2rem 0', textAlign: 'right' }}>{(Number(item?.price || 0) * Number(item?.quantity || 1)).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</td>
+                    {!isMarketWorker && (
+                      <>
+                        <td style={{ padding: '0.2rem 0', textAlign: 'right' }}>{Number(item?.price || 0).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</td>
+                        <td style={{ padding: '0.2rem 0', textAlign: 'right' }}>{(Number(item?.price || 0) * Number(item?.quantity || 1)).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</td>
+                      </>
+                    )}
                   </tr>
                 ))}
               </tbody>
             </table>
 
-            <div style={{ textAlign: 'right', fontSize: '16px', fontWeight: 'bold' }}>
-                TOTAL {Number(lastSale.total).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}
-            </div>
+            {!isMarketWorker && (
+              <div style={{ textAlign: 'right', fontSize: '16px', fontWeight: 'bold' }}>
+                  TOTAL {Number(lastSale.total).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}
+              </div>
+            )}
 
             <div style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.875rem' }}>
                 Obrigado pela preferência!<br />

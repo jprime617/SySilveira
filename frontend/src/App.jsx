@@ -16,7 +16,16 @@ import Reports from './pages/Reports';
 
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem('@ERPLite:token');
-  return token ? <Layout>{children}</Layout> : <Navigate to="/login" />;
+  if (!token) return <Navigate to="/login" />;
+
+  try {
+    const user = JSON.parse(localStorage.getItem('@ERPLite:user') || '{}');
+    if (user.role === 'MARKET_WORKER' && window.location.pathname !== '/pos') {
+      return <Navigate to="/pos" />;
+    }
+  } catch (err) {}
+
+  return <Layout>{children}</Layout>;
 };
 
 function App() {
