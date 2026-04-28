@@ -13,7 +13,7 @@ import EditSale from './pages/EditSale';
 import DeliveryPeople from './pages/DeliveryPeople';
 import Users from './pages/Users';
 import Reports from './pages/Reports';
-import AppErrorInterceptor from './components/AppErrorInterceptor';
+
 import AuditLogs from './pages/AuditLogs';
 
 const PrivateRoute = ({ children }) => {
